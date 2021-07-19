@@ -5,30 +5,37 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.MerchantEntity;
+
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
 import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPointer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import fi.dy.masa.malilib.util.GuiUtils;
 
-public class VillagerUtils
-{
-    public static boolean switchToTradeByVisibleIndex(int visibleIndex)
-    {
+public class VillagerUtils {
+    public static boolean switchToTradeByVisibleIndex(int visibleIndex) {
         Screen screen = GuiUtils.getCurrentScreen();
 
-        if (screen instanceof MerchantScreen)
-        {
+        if (screen instanceof MerchantScreen) {
             MerchantScreen merchantScreen = (MerchantScreen) screen;
             MerchantScreenHandler handler = merchantScreen.getScreenHandler();
 
             int realIndex = getRealTradeIndexFor(visibleIndex, handler);
 
-            if (realIndex >= 0)
-            {
+            if (realIndex >= 0) {
                 // Use the real (server-side) index
                 handler.setRecipeIndex(realIndex);
 
@@ -45,24 +52,19 @@ public class VillagerUtils
         return false;
     }
 
-    public static int getRealTradeIndexFor(int visibleIndex, MerchantScreenHandler handler)
-    {
-        if (handler instanceof IMerchantScreenHandler)
-        {
+    public static int getRealTradeIndexFor(int visibleIndex, MerchantScreenHandler handler) {
+        if (handler instanceof IMerchantScreenHandler) {
             TradeOfferList originalList = ((IMerchantScreenHandler) handler).getOriginalList();
             TradeOfferList customList = handler.getRecipes();
 
             if (originalList != null && customList != null &&
-                visibleIndex >= 0 && visibleIndex < customList.size())
-            {
+                    visibleIndex >= 0 && visibleIndex < customList.size()) {
                 TradeOffer trade = customList.get(visibleIndex);
 
-                if (trade != null)
-                {
+                if (trade != null) {
                     int realIndex = originalList.indexOf(trade);
 
-                    if (realIndex >= 0 && realIndex < originalList.size())
-                    {
+                    if (realIndex >= 0 && realIndex < originalList.size()) {
                         return realIndex;
                     }
                 }
@@ -72,33 +74,27 @@ public class VillagerUtils
         return -1;
     }
 
-    public static TradeOfferList buildCustomTradeList(TradeOfferList originalList)
-    {
+    public static TradeOfferList buildCustomTradeList(TradeOfferList originalList) {
         FavoriteData data = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(originalList);
         List<Integer> favorites = data.favorites;
 
         //System.out.printf("build - fav: %s (%s), or: %d\n", favorites, data.isGlobal, originalList.size());
 
         // Some favorites defined
-        if (favorites.isEmpty() == false)
-        {
+        if (favorites.isEmpty() == false) {
             TradeOfferList list = new TradeOfferList();
             int originalListSize = originalList.size();
 
             // First pick all the favorited recipes, in the order they are in the favorites list
-            for (int index : favorites)
-            {
-                if (index >= 0 && index < originalListSize)
-                {
+            for (int index : favorites) {
+                if (index >= 0 && index < originalListSize) {
                     list.add(originalList.get(index));
                 }
             }
 
             // Then add the rest of the recipes in their original order
-            for (int i = 0; i < originalListSize; ++i)
-            {
-                if (favorites.contains(i) == false)
-                {
+            for (int i = 0; i < originalListSize; ++i) {
+                if (favorites.contains(i) == false) {
                     list.add(originalList.get(i));
                 }
             }
@@ -109,26 +105,22 @@ public class VillagerUtils
         return originalList;
     }
 
-    public static List<Integer> getGlobalFavoritesFor(TradeOfferList originalTrades, Collection<TradeType> globalFavorites)
-    {
+    public static List<Integer> getGlobalFavoritesFor(TradeOfferList originalTrades, Collection<TradeType> globalFavorites) {
         List<Integer> favorites = new ArrayList<>();
         Map<TradeType, Integer> trades = new HashMap<>();
         final int size = originalTrades.size();
 
         // Build a map from the trade types to the indices in the current villager's trade list
-        for (int i = 0; i < size; ++i)
-        {
+        for (int i = 0; i < size; ++i) {
             TradeOffer trade = originalTrades.get(i);
             trades.put(TradeType.of(trade), i);
         }
 
         // Pick the trade list indices that are in the global favorites, in the order that they were global favorited
-        for (TradeType type : globalFavorites)
-        {
+        for (TradeType type : globalFavorites) {
             Integer index = trades.get(type);
 
-            if (index != null)
-            {
+            if (index != null) {
                 favorites.add(index);
             }
         }
@@ -147,5 +139,44 @@ public class VillagerUtils
         //System.out.printf("getGlobalFavoritesFor - list: %s - or: %d | global: %s\n", favorites, originalTrades.size(), globalFavorites);
 
         return favorites;
+    }
+
+    public static long merchantLastSeen;
+    static long WINDOW_CLOSE_DELAY = Configs.Generic.VILLAGER_INFINITE_TRADE_DELAY.getIntegerValue();
+    public static void doAutoTrades() {
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        Screen currentScreen = mc.currentScreen;
+
+        if (currentScreen != null && !(currentScreen instanceof MerchantScreen)) {
+            return;
+        }
+
+        ClientPlayerEntity player = mc.player;
+        ClientWorld world = mc.world;
+        MerchantEntity merchant = null;
+
+        // Find the first villager within x blocks
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof MerchantEntity) {
+                if (entity.getPos().distanceTo(player.getPos()) <= 10) {
+                    merchant = (MerchantEntity) entity;
+                    break;
+                }
+            }
+        }
+
+        if(merchant != null){
+            merchantLastSeen = mc.world.getTime();
+            if(currentScreen == null){
+                mc.interactionManager.interactEntity(player, merchant, Hand.MAIN_HAND);
+                WINDOW_CLOSE_DELAY = Configs.Generic.VILLAGER_INFINITE_TRADE_DELAY.getIntegerValue();
+            }
+        } else {
+            if(currentScreen instanceof MerchantScreen && mc.world.getTime() - merchantLastSeen >= WINDOW_CLOSE_DELAY){
+                InventoryUtils.villagerTradeEverythingPossibleWithAllFavoritedTrades();
+                mc.player.closeScreen();
+            }
+        }
     }
 }

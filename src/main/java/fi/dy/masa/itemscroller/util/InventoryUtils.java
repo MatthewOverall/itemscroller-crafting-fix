@@ -26,6 +26,7 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.RecipeType;
@@ -734,7 +735,14 @@ public class InventoryUtils
                     break;
                 }
 
-                shiftClickSlot(merchantGui, slot.id);
+                if(Configs.Toggles.VILLAGER_DROP_TRADES.getBooleanValue()) {
+                    ItemStack tradeStack = slot.getStack().copy();
+                    shiftClickSlot(merchantGui, slot.id);
+                    dropAllMatchingStacks(merchantGui, tradeStack);
+                }
+                else{
+                    shiftClickSlot(merchantGui, slot.id);
+                }
 
                 // No room in player inventory
                 if (slot.hasStack())

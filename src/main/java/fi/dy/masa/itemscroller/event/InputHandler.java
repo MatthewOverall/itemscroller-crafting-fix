@@ -141,17 +141,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
             final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
 
-            if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
-            {
-                VillagerDataStorage storage = VillagerDataStorage.getInstance();
 
-                if (GuiUtils.getCurrentScreen() == null && mc.crosshairTarget != null &&
-                    mc.crosshairTarget.getType() == HitResult.Type.ENTITY &&
-                    ((EntityHitResult) mc.crosshairTarget).getEntity() instanceof MerchantEntity)
-                {
-                    storage.setLastInteractedUUID(((EntityHitResult) mc.crosshairTarget).getEntity().getUuid());
-                }
-            }
 
             if (GuiUtils.getCurrentScreen() instanceof HandledScreen &&
                 (GuiUtils.getCurrentScreen() instanceof CreativeInventoryScreen) == false &&
@@ -221,6 +211,18 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                     {
                         cancel |= InventoryUtils.shiftDropItems(gui);
                     }
+                }
+            }
+
+            if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
+            {
+                VillagerDataStorage storage = VillagerDataStorage.getInstance();
+
+                if (GuiUtils.getCurrentScreen() == null && mc.crosshairTarget != null &&
+                        mc.crosshairTarget.getType() == HitResult.Type.ENTITY &&
+                        ((EntityHitResult) mc.crosshairTarget).getEntity() instanceof MerchantEntity)
+                {
+                    storage.setLastInteractedUUID(((EntityHitResult) mc.crosshairTarget).getEntity().getUuid());
                 }
             }
         }

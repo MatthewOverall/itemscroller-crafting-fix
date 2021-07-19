@@ -42,7 +42,8 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",  false, "When enabled, the item movement direction depends\non the slots' y-position on screen. Might be derpy with more\ncomplex inventories, use with caution!");
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",      true, "Whether or not global (per-item-type) villager trade\nfavorites should be used.");
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true, "Remember and restore the last scroll position in the\ntrade list when re-opening the GUI");
-
+        public static final ConfigBoolean VILLAGER_INFINITE_TRADES              = new ConfigBoolean("enableVillagerInfiniteTrades",         false, "Enable Infinite Trading of Favorites");
+        public static final ConfigInteger VILLAGER_INFINITE_TRADE_DELAY         = new ConfigInteger("infiniteTradeDelay",                           25, 0, 1000, "Game ticks to delay before trading. \n (The delay begins when the village is out of sight)");
         public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
                 MASS_CRAFT_HOLD,        
                 CARPET_CTRL_Q_CRAFTING,
@@ -58,7 +59,9 @@ public class Configs implements IConfigHandler
                 REVERSE_SCROLL_DIRECTION_STACKS,
                 SLOT_POSITION_AWARE_SCROLL_DIRECTION,
                 VILLAGER_TRADE_USE_GLOBAL_FAVORITES,
-                VILLAGER_TRADE_LIST_REMEMBER_SCROLL
+                VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
+                VILLAGER_INFINITE_TRADES,
+                VILLAGER_INFINITE_TRADE_DELAY
         );
     }
 
@@ -76,6 +79,8 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SHIFT_DROP_ITEMS          = new ConfigBoolean("enableShiftDropItems",             true, "Enables dropping all matching items at once by holding\nshift while clicking to drop a stack");
         public static final ConfigBoolean SHIFT_PLACE_ITEMS         = new ConfigBoolean("enableShiftPlaceItems",            true, "Enables moving all matching stacks at once by holding\nshift while placing items to an empty slot");
         public static final ConfigBoolean VILLAGER_TRADE_FEATURES   = new ConfigBoolean("enableVillagerTradeFeatures",      true, "Enable trade favoriting and quick trade features for villagers.\nNote: The Shift + scrolling over the output slot is a separate feature\nand not affected by this option.\nThis option enables middle clicking to mark favorite trades,\nand right clicking on the trade list to fully trade that one trade.");
+        public static final ConfigBoolean VILLAGER_DROP_TRADES      = new ConfigBoolean("enableVillagerTradeDrop",          false, "Automatic villager trades will be dropped instead of being moved to player inventory.");
+
 
         public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
                 CRAFTING_FEATURES,
@@ -89,7 +94,8 @@ public class Configs implements IConfigHandler
                 SCROLL_VILLAGER,
                 SHIFT_DROP_ITEMS,
                 SHIFT_PLACE_ITEMS,
-                VILLAGER_TRADE_FEATURES
+                VILLAGER_TRADE_FEATURES,
+                VILLAGER_DROP_TRADES
         );
     }
 

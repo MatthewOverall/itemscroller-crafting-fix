@@ -11,6 +11,7 @@ public class Hotkeys
     private static final KeybindSettings GUI_RELAXED = KeybindSettings.create(KeybindSettings.Context.GUI, KeyAction.PRESS, true, false, false, false);
     private static final KeybindSettings GUI_RELAXED_CANCEL = KeybindSettings.create(KeybindSettings.Context.GUI, KeyAction.PRESS, true, false, false, true);
     private static final KeybindSettings GUI_NO_ORDER = KeybindSettings.create(KeybindSettings.Context.GUI, KeyAction.PRESS, false, false, false, true);
+    private static final KeybindSettings ANY_NO_ORDER = KeybindSettings.create(KeybindSettings.Context.ANY, KeyAction.PRESS, false, true, false, true);
 
     public static final ConfigHotkey KEY_OPEN_CONFIG_GUI        = new ConfigHotkey("openConfigGui",      "I,C", "Open the in-game config GUI");
 
@@ -52,6 +53,7 @@ public class Hotkeys
     public static final ConfigHotkey MODIFIER_MOVE_STACK        = new ConfigHotkey("modifierMoveStack",      "LEFT_SHIFT", GUI_NO_ORDER, "Modifier key to move the entire stack to the other\ninventory when scrolling over it");
     public static final ConfigHotkey MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE = new ConfigHotkey("modifierToggleVillagerGlobalFavorite", "LEFT_SHIFT", GUI_RELAXED, "Modifier key to hold while middle clicking a trade,\nto toggle the global favorite state for that trade.\nGlobal favorites are used for villagers that don't have any specific favorites set.");
 
+    public static final ConfigHotkey KEY_INFINITE_TRADES_TOGGLE      = new ConfigHotkey("infiniteTradesToggle",    "", ANY_NO_ORDER , "Toggle infinite trading");
     public static final List<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
             KEY_OPEN_CONFIG_GUI,
 
@@ -91,6 +93,8 @@ public class Hotkeys
             KEY_WS_MOVE_UP_LEAVE_ONE,
             KEY_WS_MOVE_UP_MATCHING,
             KEY_WS_MOVE_UP_SINGLE,
-            KEY_WS_MOVE_UP_STACKS
+            KEY_WS_MOVE_UP_STACKS,
+
+            KEY_INFINITE_TRADES_TOGGLE
     );
 }

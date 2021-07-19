@@ -1,5 +1,7 @@
 package fi.dy.masa.itemscroller.event;
 
+import fi.dy.masa.itemscroller.villager.VillagerUtils;
+import fi.dy.masa.malilib.util.InfoUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -52,6 +54,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
 
         Hotkeys.KEY_MASS_CRAFT_TOGGLE.getKeybind().setCallback(new KeyCallbackToggleBooleanConfigWithMessage(Configs.Generic.MASS_CRAFT_HOLD));
+        Hotkeys.KEY_INFINITE_TRADES_TOGGLE.getKeybind().setCallback(new KeyCallbackToggleBooleanConfigWithMessage(Configs.Generic.VILLAGER_INFINITE_TRADES));
     }
 
     public boolean functionalityEnabled()
@@ -82,6 +85,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             return false;
         }
+
+
 
         if (key == Hotkeys.KEY_MAIN_TOGGLE.getKeybind())
         {
@@ -205,6 +210,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         if (ClickPacketBuffer.shouldCancelWindowClicks())
         {
             return;
+        }
+
+        if(Configs.Generic.VILLAGER_INFINITE_TRADES.getBooleanValue()) {
+            VillagerUtils.doAutoTrades();
         }
 
         if (GuiUtils.getCurrentScreen() instanceof HandledScreen &&
